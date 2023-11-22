@@ -23,9 +23,13 @@ function init() {
     500
   )
   const controls = new OrbitControls(camera, renderer.domElement)
-
-  const axesHelper = new THREE.AxesHelper(5);
-  scene.add(axesHelper)
+  controls.autoRotate = true
+  // controls.autoRotateSpeed = 30
+  // controls.enableDamping = true;
+  // controls.dampingFactor = 0.01
+  // controls.enableZoom = true; // 기본 true
+  // controls.enablePan = true; // 기본 true
+  // controls.maxPolarAngle = Math.PI/2 // 컨트롤 각 제한
 
   // const geometry = new THREE.BoxGeometry(2,2,2)
   const cubeGeometry = new THREE.IcosahedronGeometry(1)
@@ -74,16 +78,17 @@ function init() {
     const elapsedTime = clock.getElapsedTime() // 현재까지 경과한 시간
     // cube.rotation.x = THREE.MathUtils.degToRad(45);
     // cube.rotation.x = Date.now() / 1000 ;
-    cube.rotation.x = elapsedTime
-    cube.rotation.y = elapsedTime
+    // cube.rotation.x = elapsedTime
+    // cube.rotation.y = elapsedTime
 
-    sKeleton.rotation.x = elapsedTime * 1.5
-    sKeleton.rotation.y = elapsedTime * 1.5
+    // sKeleton.rotation.x = elapsedTime * 1.5
+    // sKeleton.rotation.y = elapsedTime * 1.5
     // cube.rotation.x += clock.getDelta() // 다음 delta까지의 간격
     // cube.position.y = Math.sin(cube.rotation.x)
     // cube.scale.x = Math.cos(cube.rotation.x)
 
     renderer.render(scene, camera)
+    controls.update()
 
     requestAnimationFrame(render)
   }
@@ -93,6 +98,7 @@ function init() {
     camera.updateProjectionMatrix()
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.render(scene, camera)
+    controls.update()
   }
 
   window.addEventListener('resize', handleResize)
