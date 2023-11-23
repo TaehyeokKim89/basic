@@ -23,6 +23,8 @@ function init() {
     500
   )
   const controls = new OrbitControls(camera, renderer.domElement)
+
+  camera.position.z = 5
   render()
 
   function render() {
