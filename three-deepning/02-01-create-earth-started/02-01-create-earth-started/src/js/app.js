@@ -7,7 +7,9 @@ import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js'
 import {GammaCorrectionShader} from 'three/examples/jsm/shaders/GammaCorrectionShader.js'
 import {ShaderPass} from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import {SMAAPass} from 'three/examples/jsm/postprocessing/SMAAPass'
-
+import dat from 'dat.gui'
+import vertexShader from '../shaders/vertex.glsl'
+import fragmentShader from '../shaders/fragment.glsl'
 
 export default function () {
   const canvasSize = {
@@ -63,6 +65,8 @@ export default function () {
   controls.enableDamping = true;
   controls.dampingFactor = 0.1;
 
+  const gui = new dat.GUI()
+
   const addLight = () => {
     const light = new THREE.DirectionalLight(0xffffff);
     light.position.set(2.64, 2.13, 1.02)
@@ -80,34 +84,21 @@ export default function () {
     const shaderPass = new ShaderPass(GammaCorrectionShader)
     const customShaderPass = new ShaderPass({
       uniforms: {
-        uColor: {value: new THREE.Vector3(0,0,1)},
+        uBrightness: {value: 0.3},
+        uPosition: {value: new THREE.Vector2(0,0)},
+        uColor: {value: new THREE.Vector3(0,0,0.15)},
         uAlpha: {value: 0.5},
         tDiffuse: {value: null}, 
       },
-      vertexShader: `
-        varying vec2 vPosition;
-        varying vec2 vUv;
-
-        void main() {
-          gl_Position = vec4(position.x, position.y, 0.0, 1.0);
-          vPosition = position.xy;
-          vUv = uv;
-        }
-      `,
-      fragmentShader: `
-       uniform vec3 uColor;
-       uniform float uAlpha;
-       uniform sampler2D tDiffuse;
-
-       varying vec2 vPosition;
-       varying vec2 vUv;
-
-      void main() {
-        vec4 tex = texture2D(tDiffuse, vUv);
-        gl_FragColor = tex;
-      }
-      `
+      vertexShader:vertexShader,
+      fragmentShader: fragmentShader
     })
+    gui.add(customShaderPass.uniforms.uPosition.value, 'x', -1, 1 , 0.01)
+    gui.add(customShaderPass.uniforms.uPosition.value, 'y', -1, 1 , 0.01)
+    gui
+      .add(customShaderPass.uniforms.uBrightness, 'value', 0, 1 , 0.01)
+      .name('brightness')
+
     effectComposer.addPass(customShaderPass)
     effectComposer.addPass(shaderPass)
 
@@ -248,7 +239,7 @@ export default function () {
 
     scene.add(earthGroup, star)
 
-    return { earthGroup, star }
+    return { earthGroup, star, curve  }
   }
 
   const resize = () => {
@@ -268,7 +259,7 @@ export default function () {
   };
 
   const draw = (obj) => {
-    const { earthGroup, star } = obj
+    const { earthGroup, star, curve } = obj
 
     earthGroup.rotation.x += 0.0005;
     earthGroup.rotation.y += 0.0005
@@ -279,6 +270,8 @@ export default function () {
 
     controls.update();
     effectComposer.render()
+
+    curve.geometry.setDrawRange(0,960)
     // renderer.render(scene, camera);
     requestAnimationFrame(() => {
       draw(obj);
